@@ -113,6 +113,9 @@ function App() {
 
   return (
     <div className="site-shell">
+      <div className="prototype-notice" role="status">
+        <div className="prototype-notice-inner"><strong>Independent prototype</strong><span>SevaConnect is not an official government website. Confirm scheme details with the linked government source.</span><a href="#trust">About this service</a></div>
+      </div>
       <header className="global-nav">
         <div className="nav-inner">
           <Brand onClick={closeMobileMenu} />
@@ -153,24 +156,21 @@ function App() {
       <main>
         <section className="hero-tile" id="home">
           <div className="hero-copy">
-            <p className="eyebrow">Support, made easier to find</p>
-            <h1>Benefits are out there.<br />Let&apos;s find your next step.</h1>
-            <p className="hero-lead">Discover public schemes, understand what you may need, and move forward with more confidence.</p>
+            <p className="eyebrow">Government schemes and public services</p>
+            <h1>Find support. Know what to do next.</h1>
+            <p className="hero-lead">Search public benefit schemes, review the information you may need, and follow links to official application sources.</p>
             <div className="hero-actions">
-              <a className="button button-primary" href="#discover">Find schemes <Icon name="arrow" size={17} /></a>
-              <button className="button button-secondary" type="button" onClick={() => setShowAssistant(true)}>Ask SevaConnect AI</button>
+              <a className="button button-primary" href="#discover">Search schemes</a>
+              <button className="button button-secondary" type="button" onClick={() => setShowAssistant(true)}>Get help understanding a scheme</button>
             </div>
-            <div className="hero-assurance"><Icon name="shield" size={16} /><span>Clear sources. Transparent matches. Your choices.</span></div>
+            <div className="hero-assurance"><Icon name="shield" size={16} /><span>Scheme matches are informational, not official eligibility decisions.</span></div>
           </div>
-          <div className="hero-image-wrap">
-            <img
-              className="hero-image"
-              src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2000&q=85"
-              alt="Sunlight across a wide agricultural landscape"
-              fetchPriority="high"
-            />
-            <div className="image-caption"><span className="caption-dot" /> Designed around real-life needs</div>
-          </div>
+          <aside className="hero-guide" aria-label="Services available">
+            <h2>What you can do here</h2>
+            <a href="#discover"><span className="guide-number">01</span><span><strong>Find schemes</strong><small>Browse by category or search</small></span><Icon name="arrow" size={16} /></a>
+            <button type="button" onClick={() => setShowProfile(true)}><span className="guide-number">02</span><span><strong>Review your details</strong><small>Create a profile for relevant guidance</small></span><Icon name="arrow" size={16} /></button>
+            <button type="button" onClick={() => setShowAssistant(true)}><span className="guide-number">03</span><span><strong>Understand next steps</strong><small>Ask a question in plain language</small></span><Icon name="arrow" size={16} /></button>
+          </aside>
         </section>
 
         <section className="discovery-section" id="discover">
@@ -205,9 +205,8 @@ function App() {
             <div className="scheme-grid">
               {filteredSchemes.map((scheme) => (
                 <article className="scheme-card" key={scheme.id}>
-                  <div className={`scheme-art art-${scheme.category.toLowerCase()}`}>
+                    <div className="scheme-heading">
                     <span className="scheme-category">{scheme.category}</span>
-                    <span className="scheme-mark">{scheme.mark}</span>
                     <button className={`save-button${saved.includes(scheme.id) ? ' is-saved' : ''}`} type="button" onClick={() => toggleSaved(scheme.id)} aria-label={saved.includes(scheme.id) ? `Remove ${scheme.name} from saved schemes` : `Save ${scheme.name}`} aria-pressed={saved.includes(scheme.id)}>
                       <Icon name="bookmark" size={18} />
                     </button>
