@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import './App.css'
 import { Icon, PrototypeNotice, SiteFooter, SiteHeader, SiteSubNav } from './components/SiteChrome.jsx'
 
@@ -52,34 +54,21 @@ const quickPrompts = [
 
 function formatMarkdownContent(text) {
     if (!text) return null
-    return text.split('\n').filter(Boolean).map((line, index) => {
-        const trimmed = line.trim()
-        const isHeading = trimmed.startsWith('### ')
-        const isBullet = /^([•*-]|\d+\.)\s+/.test(trimmed)
-        const content = trimmed.replace(/^###\s+/, '').replace(/^([•*-]|\d+\.)\s+/, '')
-        const parts = content.split(/(\*\*[^*]+\*\*)/g).map((part, partIndex) => (
-            part.startsWith('**') && part.endsWith('**')
-                ? <strong key={partIndex}>{part.slice(2, -2)}</strong>
-                : part
-        ))
-        if (isHeading) return <h4 className="chat-heading" key={index}>{parts}</h4>
-        if (isBullet) return <p className="chat-para" key={index}>• {parts}</p>
-        return <p className="chat-para" key={index}>{parts}</p>
-    })
-}
+    const normalizedText = text.replace(/<br\s*\/?>/gi, '  \n')
 
-function getClientFallbackAnswer(question, language) {
-    const query = question.toLowerCase()
-    const scheme = schemes.find((item) => `${item.name} ${item.category} ${item.description}`.toLowerCase().includes(query)) || schemes[0]
-    const source = `[${scheme.name} official source](${scheme.source})`
-
-    if (language === 'hi') {
-        return `### ${scheme.name}\n\n• **लाभ:** ${scheme.description}\n• **श्रेणी:** ${scheme.category}\n• **आधिकारिक स्रोत:** ${source}\n\nअधिक जानकारी के लिए आप दस्तावेज़ या आवेदन प्रक्रिया के बारे में पूछ सकते हैं। अंतिम पात्रता संबंधित सरकारी विभाग निर्धारित करता है।`
-    }
-    if (language === 'hinglish') {
-        return `### ${scheme.name}\n\n• **Benefits:** ${scheme.description}\n• **Category:** ${scheme.category}\n• **Official source:** ${source}\n\nAap documents ya application process ke baare mein bhi pooch sakte hain. Final eligibility government authority decide karti hai.`
-    }
-    return `### ${scheme.name}\n\n• **Benefits:** ${scheme.description}\n• **Category:** ${scheme.category}\n• **Official source:** ${source}\n\nYou can also ask about required documents or the application process. Final eligibility is determined by the relevant government authority.`
+    return (
+        <div className="markdown-body">
+            <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                    table: ({ children }) => <div className="chat-table-wrap"><table>{children}</table></div>,
+                    a: ({ href, children }) => <a href={href} target="_blank" rel="noreferrer">{children}</a>,
+                }}
+            >
+                {normalizedText}
+            </ReactMarkdown>
+        </div>
+    )
 }
 
 function App() {
@@ -90,7 +79,14 @@ function App() {
     const [showProfile, setShowProfile] = useState(false)
     const [showAssistant, setShowAssistant] = useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const [profile, setProfile] = useState({ state: '', age: '', occupation: '' })
+    const [profile, setProfile] = useState({
+        state: '',
+        age: '',
+        gender: '',
+        residenceType: '',
+        annualFamilyIncome: '',
+        occupation: '',
+    })
     const [profileSaved, setProfileSaved] = useState(false)
     const [message, setMessage] = useState('')
     const [conversation, setConversation] = useState([])
@@ -140,12 +136,18 @@ function App() {
                 body: JSON.stringify({
                     message: text,
                     language: aiLanguage,
-                    conversationId,
-                    profile: profileSaved ? profile : undefined,
+                    ...(conversationId ? { conversationId } : {}),
+                    profile: profileSaved ? {
+                        ...profile,
+                        age: Number(profile.age),
+                        annualFamilyIncome: profile.annualFamilyIncome === '' ? undefined : Number(profile.annualFamilyIncome),
+                        isFarmer: profile.occupation === 'FARMER',
+                        isStudent: profile.occupation === 'STUDENT',
+                    } : undefined,
                 }),
             })
-            if (!response.ok) throw new Error(`Server returned ${response.status}`)
             const payload = await response.json()
+            if (!response.ok) throw new Error(payload?.error?.message || `Server returned ${response.status}`)
             if (!payload.success || !payload.data) throw new Error('Invalid assistant response')
             const data = payload.data
             if (data.conversationId) setConversationId(data.conversationId)
@@ -156,13 +158,13 @@ function App() {
                 sources: data.sources || [],
                 model: data.model || aiStatus.activeModel,
             }])
-        } catch {
+        } catch (error) {
             setConversation((current) => [...current, {
                 id: `a_fallback_${Date.now()}`,
                 role: 'assistant',
-                content: getClientFallbackAnswer(text, aiLanguage),
-                model: 'SevaConnect Intelligent Engine (Open Source)',
-                sources: [{ title: 'India.gov.in', url: 'https://www.india.gov.in' }],
+                content: `I couldn't get a response from SevaConnect AI (${error.message || 'connection error'}). Please check that the API is running and try again. This message is not an eligibility result.`,
+                model: 'AI service unavailable',
+                sources: [],
             }])
         } finally {
             setIsLoading(false)
@@ -334,12 +336,15 @@ function App() {
                         <button className="dialog-close" type="button" onClick={() => setShowProfile(false)} aria-label="Close profile form"><Icon name="close" /></button>
                         <p className="eyebrow">A more relevant starting point</p>
                         <h2 id="profile-dialog-title">Build your profile.</h2>
-                        <p className="dialog-lead">Share only what you are comfortable sharing. These details stay in this demo session.</p>
+                        <p className="dialog-lead">Share only what you are comfortable sharing. These details stay in this browser session and are sent with your AI questions, but are not saved to your account.</p>
                         <form className="profile-form" onSubmit={(event) => { event.preventDefault(); setProfileSaved(true); setShowProfile(false) }}>
                             <label>State or union territory<input value={profile.state} onChange={(event) => setProfile({ ...profile, state: event.target.value })} placeholder="e.g. Maharashtra" required /></label>
-                            <label>Age group<select value={profile.age} onChange={(event) => setProfile({ ...profile, age: event.target.value })} required><option value="" disabled>Select an age group</option><option>Under 18</option><option>18–29</option><option>30–59</option><option>60 or above</option></select></label>
-                            <label>What best describes you?<select value={profile.occupation} onChange={(event) => setProfile({ ...profile, occupation: event.target.value })} required><option value="" disabled>Select one</option><option>Student</option><option>Farmer</option><option>Self-employed</option><option>Employed</option><option>Looking for work</option><option>Other</option></select></label>
-                            <div className="privacy-note"><Icon name="shield" size={17} /><span>Demo only: details are kept in page memory and are not sent to a server.</span></div>
+                            <label>Age in years<input type="number" min="1" max="120" value={profile.age} onChange={(event) => setProfile({ ...profile, age: event.target.value })} placeholder="e.g. 32" required /></label>
+                            <label>Gender<select value={profile.gender} onChange={(event) => setProfile({ ...profile, gender: event.target.value })}><option value="">Prefer not to say</option><option value="MALE">Male</option><option value="FEMALE">Female</option><option value="OTHER">Other</option></select></label>
+                            <label>Residence type<select value={profile.residenceType} onChange={(event) => setProfile({ ...profile, residenceType: event.target.value })}><option value="">Select if known</option><option value="RURAL">Rural</option><option value="URBAN">Urban</option></select></label>
+                            <label>Annual family income (INR)<input type="number" min="0" value={profile.annualFamilyIncome} onChange={(event) => setProfile({ ...profile, annualFamilyIncome: event.target.value })} placeholder="Optional" /></label>
+                            <label>What best describes you?<select value={profile.occupation} onChange={(event) => setProfile({ ...profile, occupation: event.target.value })} required><option value="" disabled>Select one</option><option value="STUDENT">Student</option><option value="FARMER">Farmer</option><option value="SELF_EMPLOYED">Self-employed</option><option value="EMPLOYED">Employed</option><option value="LOOKING_FOR_WORK">Looking for work</option><option value="OTHER">Other</option></select></label>
+                            <div className="privacy-note"><Icon name="shield" size={17} /><span>These details stay in this browser session and are sent to the configured AI provider when you ask a question. They are not saved as your Atlas profile.</span></div>
                             <button className="button button-primary form-submit" type="submit">Save profile <Icon name="arrow" size={16} /></button>
                         </form>
                     </section>
