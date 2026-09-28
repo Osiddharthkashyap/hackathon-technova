@@ -1,0 +1,120 @@
+version: 1
+name: ai-agent-skills
+format: portable-markdown-skills
+entrypoint: AGENTS.md
+required:
+  - 00-core/execution
+  - 00-core/validation
+  - 04-tools/tool-use
+  - 08-security/security-privacy
+  - 11-recovery/recovery
+  - 12-output/output-quality
+skills:
+  - id: 00-core/execution
+    path: skills/00-core/execution/SKILL.md
+    triggers: [all_tasks]
+    priority: critical
+  - id: 00-core/context
+    path: skills/00-core/context/SKILL.md
+    triggers: [all_tasks]
+    priority: critical
+  - id: 00-core/validation
+    path: skills/00-core/validation/SKILL.md
+    triggers: [all_tasks]
+    priority: critical
+  - id: 01-orchestration/planning
+    path: skills/01-orchestration/planning/SKILL.md
+    triggers: [multi_step, ambiguous, complex]
+    priority: high
+  - id: 01-orchestration/decomposition
+    path: skills/01-orchestration/decomposition/SKILL.md
+    triggers: [multi_domain, parallelizable, multi_agent]
+    priority: high
+  - id: 01-orchestration/delegation
+    path: skills/01-orchestration/delegation/SKILL.md
+    triggers: [multi_agent, specialist_work]
+    priority: high
+  - id: 02-reasoning/uncertainty
+    path: skills/02-reasoning/uncertainty/SKILL.md
+    triggers: [uncertain, incomplete_data, estimates]
+    priority: high
+  - id: 02-reasoning/decision-analysis
+    path: skills/02-reasoning/decision-analysis/SKILL.md
+    triggers: [compare, choose, tradeoffs]
+    priority: high
+  - id: 03-research/web-research
+    path: skills/03-research/web-research/SKILL.md
+    triggers: [current_info, niche_info, citations, web]
+    priority: high
+  - id: 03-research/source-evaluation
+    path: skills/03-research/source-evaluation/SKILL.md
+    triggers: [research, disputed_claims, high_stakes]
+    priority: high
+  - id: 04-tools/tool-use
+    path: skills/04-tools/tool-use/SKILL.md
+    triggers: [tool_call]
+    priority: critical
+  - id: 04-tools/retry-timeout
+    path: skills/04-tools/retry-timeout/SKILL.md
+    triggers: [tool_failure, timeout, rate_limit]
+    priority: high
+  - id: 05-files/file-ops
+    path: skills/05-files/file-ops/SKILL.md
+    triggers: [file_task, document_task, attachment]
+    priority: high
+  - id: 05-files/artifact-generation
+    path: skills/05-files/artifact-generation/SKILL.md
+    triggers: [create_file, export, deliverable]
+    priority: high
+  - id: 06-code/software-engineering
+    path: skills/06-code/software-engineering/SKILL.md
+    triggers: [code, repository, script]
+    priority: high
+  - id: 07-testing/testing
+    path: skills/07-testing/testing/SKILL.md
+    triggers: [code, data_pipeline, generated_artifact]
+    priority: critical
+  - id: 08-security/security-privacy
+    path: skills/08-security/security-privacy/SKILL.md
+    triggers: [all_tasks]
+    priority: critical
+  - id: 08-security/prompt-injection
+    path: skills/08-security/prompt-injection/SKILL.md
+    triggers: [untrusted_content, web, files, agents]
+    priority: critical
+  - id: 09-memory/memory
+    path: skills/09-memory/memory/SKILL.md
+    triggers: [memory_read, memory_write]
+    priority: high
+  - id: 10-communication/user-interaction
+    path: skills/10-communication/user-interaction/SKILL.md
+    triggers: [all_tasks, clarification, progress_updates]
+    priority: high
+  - id: 10-communication/agent-handoff
+    path: skills/10-communication/agent-handoff/SKILL.md
+    triggers: [handoff, delegation]
+    priority: high
+  - id: 11-recovery/recovery
+    path: skills/11-recovery/recovery/SKILL.md
+    triggers: [all_tasks, failure]
+    priority: critical
+  - id: 11-recovery/rollback
+    path: skills/11-recovery/rollback/SKILL.md
+    triggers: [mutation, deployment, destructive_change]
+    priority: high
+  - id: 12-output/output-quality
+    path: skills/12-output/output-quality/SKILL.md
+    triggers: [all_tasks]
+    priority: critical
+  - id: 12-output/citations-and-provenance
+    path: skills/12-output/citations-and-provenance/SKILL.md
+    triggers: [research, web, source_based_answer]
+    priority: high
+  - id: 13-specialized/data-analysis
+    path: skills/13-specialized/data-analysis/SKILL.md
+    triggers: [spreadsheet, csv, dataset, analytics]
+    priority: high
+  - id: 13-specialized/pdf-and-document-analysis
+    path: skills/13-specialized/pdf-and-document-analysis/SKILL.md
+    triggers: [pdf, document, scan]
+    priority: high
