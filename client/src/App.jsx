@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
+import { Icon, PrototypeNotice, SiteFooter, SiteHeader, SiteSubNav } from './components/SiteChrome.jsx'
 
 const schemes = [
   {
@@ -576,14 +577,7 @@ function App() {
         </section>
       </main>
 
-      <footer className="site-footer">
-        <div className="footer-main">
-          <div className="footer-brand"><Brand /><p>Helping people find a clearer path<br />to public support.</p></div>
-          <div className="footer-links"><span>Explore</span><a href="#discover">Find schemes</a><a href="#how-it-works">How it works</a><a href="#trust">Our approach</a></div>
-          <div className="footer-links"><span>Get help</span><button type="button" onClick={() => setShowAssistant(true)}>Ask SevaConnect AI</button><button type="button" onClick={() => setShowProfile(true)}>Your profile</button></div>
-        </div>
-        <div className="footer-legal"><span>© 2026 SevaConnect · Hackathon prototype</span><span>Not an official government website</span></div>
-      </footer>
+      <SiteFooter />
 
       {/* Scheme Detail Dialog */}
       {selectedScheme && (
