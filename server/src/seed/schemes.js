@@ -215,6 +215,14 @@ const schemes = [
   },
 ];
 
+export const seedSchemes = schemes.map((s, index) => ({
+  ...s,
+  _id: s._id || `65f00000000000000000000${(index + 1).toString(16).padStart(2, '0')}`,
+  isActive: true,
+}));
+
+export default seedSchemes;
+
 async function seed() {
   try {
     const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/sevaconnect';
@@ -226,7 +234,7 @@ async function seed() {
     console.log('Cleared existing schemes.');
 
     // Insert new schemes
-    const created = await Scheme.insertMany(schemes);
+    const created = await Scheme.insertMany(seedSchemes);
     console.log(`Seeded ${created.length} government schemes.`);
 
     await mongoose.disconnect();
@@ -238,4 +246,7 @@ async function seed() {
   }
 }
 
-seed();
+// Only run automatically when executed directly from CLI
+if (process.argv[1] && process.argv[1].replace(/\\/g, '/').includes('seed/schemes.js')) {
+  seed();
+}

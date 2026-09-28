@@ -28,8 +28,13 @@ const conversationSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      required: false,
       index: true,
+    },
+    sessionId: {
+      type: String,
+      index: true,
+      default: '',
     },
     title: {
       type: String,

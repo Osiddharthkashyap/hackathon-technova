@@ -9,6 +9,7 @@
     "seed": "node src/seed/schemes.js"
   },
   "dependencies": {
+    "@google/genai": "^2.24.0",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

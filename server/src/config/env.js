@@ -10,7 +10,12 @@ const env = {
   JWT_ACCESS_EXPIRY: process.env.JWT_ACCESS_EXPIRY || '15m',
   JWT_REFRESH_EXPIRY: process.env.JWT_REFRESH_EXPIRY || '7d',
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
+  GEMINI_MODEL: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+  GROQ_API_KEY: process.env.GROQ_API_KEY || '',
+  GROQ_MODEL: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
   OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
+  AI_PROVIDER: process.env.AI_PROVIDER || 'auto', // 'groq' | 'gemini' | 'openai' | 'builtin' | 'auto'
   QDRANT_URL: process.env.QDRANT_URL || '',
   QDRANT_API_KEY: process.env.QDRANT_API_KEY || '',
 };
