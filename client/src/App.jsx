@@ -41,9 +41,26 @@ const schemes = [
         source: 'https://scholarships.gov.in/',
         mark: '04',
     },
+    { id: 'pm-ujjwala', name: 'PM Ujjwala Yojana', category: 'Social welfare', audience: 'For eligible women in low-income households', description: 'Explore support for a clean cooking fuel connection and find the official application route.', source: 'https://www.pmuy.gov.in/', mark: '05' },
+    { id: 'mgnrega', name: 'Mahatma Gandhi NREGA', category: 'Employment', audience: 'For rural households seeking wage employment', description: 'Learn about the rural employment guarantee and how to request work through your Gram Panchayat.', source: 'https://nrega.nic.in/', mark: '06' },
+    { id: 'mudra', name: 'Pradhan Mantri MUDRA Yojana', category: 'Business', audience: 'For micro and small business owners', description: 'Review loan options for starting or growing a small business.', source: 'https://www.mudra.org.in/', mark: '07' },
+    { id: 'kcc', name: 'Kisan Credit Card', category: 'Agriculture', audience: 'For farmers and agricultural workers', description: 'Find information about flexible credit for farming and related needs.', source: 'https://www.myscheme.gov.in/schemes/kcc', mark: '08' },
+    { id: 'ladli-behna', name: 'Ladli Behna Yojana', category: 'Women', audience: 'For eligible women in Madhya Pradesh', description: 'Check the state program information and its current application guidance.', source: 'https://cmladlibahna.mp.gov.in/', mark: '09' },
+    { id: 'atal-pension', name: 'Atal Pension Yojana', category: 'Pension', audience: 'For eligible subscribers aged 18 to 40', description: 'Understand the contributory pension scheme and how to enroll through a bank.', source: 'https://www.npscra.nsdl.co.in/scheme-details.php', mark: '10' },
+    { id: 'pm-surya-ghar', name: 'PM Surya Ghar: Muft Bijli Yojana', category: 'Energy', audience: 'For residential electricity consumers', description: 'Explore rooftop solar support and the official national portal.', source: 'https://pmsuryaghar.gov.in/', mark: '11' },
+    { id: 'sukanya-samriddhi', name: 'Sukanya Samriddhi Account', category: 'Savings', audience: 'For guardians of a girl child', description: 'Learn about this small savings scheme and account opening through banks or post offices.', source: 'https://www.indiapost.gov.in/', mark: '12' },
+    { id: 'pm-vishwakarma', name: 'PM Vishwakarma', category: 'Skills', audience: 'For traditional artisans and craftspeople', description: 'See support options for skills, tools, and credit for traditional trades.', source: 'https://pmvishwakarma.gov.in/', mark: '13' },
+    { id: 'pmay-gramin', name: 'PM Awas Yojana (Gramin)', category: 'Housing', audience: 'For eligible rural households', description: 'Review rural housing assistance information and where to check beneficiary details.', source: 'https://pmayg.nic.in/', mark: '14' },
+    { id: 'pmfby', name: 'Pradhan Mantri Fasal Bima Yojana', category: 'Agriculture', audience: 'For farmers growing notified crops', description: 'Find crop insurance information and the official enrollment portal.', source: 'https://pmfby.gov.in/', mark: '15' },
+    { id: 'jan-dhan', name: 'Pradhan Mantri Jan Dhan Yojana', category: 'Banking', audience: 'For people seeking access to banking services', description: 'Learn about basic bank accounts and financial inclusion services.', source: 'https://pmjdy.gov.in/', mark: '16' },
+    { id: 'stand-up-india', name: 'Stand-Up India', category: 'Business', audience: 'For women and SC/ST entrepreneurs', description: 'Explore bank loan support for setting up a greenfield enterprise.', source: 'https://www.standupmitra.in/', mark: '17' },
+    { id: 'pm-shram-yogi', name: 'PM Shram Yogi Maandhan', category: 'Pension', audience: 'For eligible workers in the unorganized sector', description: 'Review the voluntary contributory pension scheme and enrollment options.', source: 'https://maandhan.in/', mark: '18' },
+    { id: 'pm-poshan', name: 'PM POSHAN', category: 'Health', audience: 'For children in eligible schools', description: 'Learn about the school meal program and its nutrition support.', source: 'https://pmposhan.education.gov.in/', mark: '19' },
+    { id: 'pm-matru-vandana', name: 'Pradhan Mantri Matru Vandana Yojana', category: 'Women', audience: 'For eligible pregnant and lactating women', description: 'Find information about maternity benefit support and how to apply.', source: 'https://pmmvy.wcd.gov.in/', mark: '20' },
 ]
 
-const categories = ['All schemes', 'Agriculture', 'Health', 'Housing', 'Education']
+const categories = ['All schemes', ...new Set(schemes.map((scheme) => scheme.category))]
+const schemesPerPage = 6
 
 const quickPrompts = [
     { label: 'PM-KISAN eligibility', query: 'Am I eligible for PM-KISAN and what documents do I need?' },
@@ -74,6 +91,7 @@ function formatMarkdownContent(text) {
 function App() {
     const [query, setQuery] = useState('')
     const [activeCategory, setActiveCategory] = useState('All schemes')
+    const [currentPage, setCurrentPage] = useState(1)
     const [saved, setSaved] = useState([])
     const [selectedScheme, setSelectedScheme] = useState(null)
     const [showProfile, setShowProfile] = useState(false)
@@ -115,6 +133,8 @@ function App() {
         const searchText = `${scheme.name} ${scheme.category} ${scheme.audience} ${scheme.description}`.toLowerCase()
         return matchesCategory && searchText.includes(query.trim().toLowerCase())
     })
+    const pageCount = Math.ceil(filteredSchemes.length / schemesPerPage)
+    const visibleSchemes = filteredSchemes.slice((currentPage - 1) * schemesPerPage, currentPage * schemesPerPage)
 
     const toggleSaved = (schemeId) => {
         setSaved((current) => current.includes(schemeId)
@@ -229,7 +249,7 @@ function App() {
                     <div className="discovery-controls">
                         <label className="search-field">
                             <Icon name="search" size={19} />
-                            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by scheme, need, or category" />
+                            <input value={query} onChange={(event) => { setQuery(event.target.value); setCurrentPage(1) }} placeholder="Search by scheme, need, or category" />
                         </label>
                         <div className="category-list" role="group" aria-label="Filter schemes by category">
                             {categories.map((category) => (
@@ -237,7 +257,7 @@ function App() {
                                     className={`category-chip${activeCategory === category ? ' is-active' : ''}`}
                                     type="button"
                                     key={category}
-                                    onClick={() => setActiveCategory(category)}
+                                    onClick={() => { setActiveCategory(category); setCurrentPage(1) }}
                                     aria-pressed={activeCategory === category}
                                 >{category}</button>
                             ))}
@@ -246,7 +266,7 @@ function App() {
 
                     {filteredSchemes.length ? (
                         <div className="scheme-grid">
-                            {filteredSchemes.map((scheme) => (
+                            {visibleSchemes.map((scheme) => (
                                 <article className="scheme-card" key={scheme.id}>
                                     <div className="scheme-heading">
                                         <span className="scheme-category">{scheme.category}</span>
@@ -264,8 +284,13 @@ function App() {
                             ))}
                         </div>
                     ) : (
-                        <div className="empty-state"><Icon name="search" size={24} /><h3>No schemes found</h3><p>Try a different search or choose another category.</p><button className="text-link" type="button" onClick={() => { setQuery(''); setActiveCategory('All schemes') }}>Clear filters</button></div>
+                        <div className="empty-state"><Icon name="search" size={24} /><h3>No schemes found</h3><p>Try a different search or choose another category.</p><button className="text-link" type="button" onClick={() => { setQuery(''); setActiveCategory('All schemes'); setCurrentPage(1) }}>Clear filters</button></div>
                     )}
+                    {pageCount > 1 && <nav className="scheme-pagination" aria-label="Scheme pages">
+                        <button className="button button-secondary button-small" type="button" onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={currentPage === 1}>Previous</button>
+                        <span aria-live="polite">Page {currentPage} of {pageCount}</span>
+                        <button className="button button-secondary button-small" type="button" onClick={() => setCurrentPage((page) => Math.min(pageCount, page + 1))} disabled={currentPage === pageCount}>Next</button>
+                    </nav>}
                     {saved.length > 0 && <p className="saved-count"><Icon name="bookmark" size={15} /> {saved.length} {saved.length === 1 ? 'scheme' : 'schemes'} saved in this session</p>}
                 </section>
 

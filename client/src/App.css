@@ -572,6 +572,21 @@ select:focus-visible {
     margin-top: 26px;
 }
 
+.scheme-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 28px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.scheme-pagination button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
 .scheme-card {
     min-width: 0;
     overflow: hidden;
