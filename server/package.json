@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "seed": "node src/seed/schemes.js"
+    "seed": "node src/seed/schemes.js",
+    "test": "node --test"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",
